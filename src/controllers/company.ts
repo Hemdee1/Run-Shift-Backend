@@ -3,7 +3,7 @@ import { RequestHandler } from "express";
 import bcrypt from "bcrypt";
 import { createToken, verifyToken } from "../utils/jwt";
 import verifyEmailTemplate from "../emails/verifyEmail";
-import sendMail from "../utils/sendMail";
+// import sendMail from "../utils/sendMail";
 import { cloudinaryUploadImage } from "../utils/uploadImage";
 import resetPasswordEmailTemplate from "../emails/resetPasswordEmail";
 
@@ -56,7 +56,7 @@ const SignUp: RequestHandler = async (req, res) => {
       html: verifyEmailTemplate({ firstName: company.companyName, link }),
     };
 
-    await sendMail(data);
+    // await sendMail(data);
 
     res.status(200).json(company);
   } catch (error: any) {
@@ -97,7 +97,7 @@ const LogIn: RequestHandler = async (req, res) => {
         html: verifyEmailTemplate({ firstName: company.companyName, link }),
       };
 
-      await sendMail(data);
+      // await sendMail(data);
 
       throw Error("Email is not verified!");
     }
@@ -187,7 +187,7 @@ const SendPasswordLink: RequestHandler = async (req, res) => {
       }),
     };
 
-    await sendMail(data);
+    // await sendMail(data);
 
     // res.status(200).json(token);
     res.status(200).json("link sent successfully");
@@ -291,6 +291,43 @@ const getAllCompanies: RequestHandler = async (req, res) => {
   }
 };
 
+// Test login function
+const testLogin: RequestHandler = async (req, res) => {
+  interface CustomSessionData {
+    userId?: string;
+  }
+  let { email, password } = req.body;
+  email = email.toLowerCase();
+  console.log(email, password);
+  try {
+    if (!(email && password)) {
+      throw Error("All credentials must be included");
+    }
+
+    const user = await prisma.users.findUnique({ where: { email } });
+
+    if (!user) {
+      throw Error("Incorrect email address");
+    }
+
+    const correctPassword = await bcrypt.compare(password, user.password);
+
+    if (password !== user.password) {
+      throw Error("Incorrect password");
+    }
+
+    // initialize session
+    (req.session as CustomSessionData).userId = user.id;
+    console.log(user)
+
+    res.status(200).json(user);
+  } catch (error: any) {
+    console.log(error);
+    res.status(400).json(error.message);
+  }
+
+}
+
 export {
   SignUp,
   LogIn,
@@ -302,4 +339,5 @@ export {
   LogOut,
   getAllCompanies,
   getCompany,
+  testLogin,
 };

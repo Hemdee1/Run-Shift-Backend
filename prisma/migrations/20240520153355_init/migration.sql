@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Shift" ALTER COLUMN "times" SET NOT NULL,
+ALTER COLUMN "times" SET DATA TYPE TEXT;

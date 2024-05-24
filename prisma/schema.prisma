@@ -13,46 +13,71 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Company {
-  id String @id @default(uuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  email String @unique
-  companyName String
-  firstName String
-  lastName String
+// Schema for testing auth on mobile app
+model Users {
+  id       String  @id @default(uuid())
+  email    String  @unique
+  name     String
   password String
-  verified Boolean @default(false)
-  staffs Staff[]
-  shifts Shift[]
-}
-
-model Staff {
-  id String @id @default(uuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
-  email String @unique
-  firstName String
-  lastName String
-  password String
-
-  companyId String
-  company Company @relation(fields: [companyId], references: [id])
-  shifts Shift[]
+  shifts   Shift[]
 }
 
 model Shift {
-  id String @id @default(uuid())
-  date DateTime
-  times String[]
-  info String[] @default([])
-  available Boolean @default(false)
-  appliedStaff String[] @default([])
-  
-  staffId String
-  companyId String
-  staff Staff @relation(fields: [staffId], references: [id])
-  company Company @relation(fields: [companyId], references: [id])
+  id        String   @id @default(uuid())
+  date      DateTime
+  times     String
+  info      String[] @default([])
+  available Boolean  @default(false)
+  userId    String
+  user      Users    @relation(fields: [userId], references: [id])
 }
+
+model Company {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  email       String  @unique
+  companyName String
+  firstName   String
+  lastName    String
+  password    String
+  verified    Boolean @default(false)
+  staffs      Staff[]
+  // shifts      Shift[]
+}
+
+model Staff {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  email     String @unique
+  firstName String
+  lastName  String
+  password  String
+
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id])
+  // shifts    Shift[]
+}
+
+model Notification {
+  id           String   @id @default(uuid())
+  createdAt    DateTime @default(now())
+  notification String
+}
+
+// model Shift {
+//   id           String   @id @default(uuid())
+//   date         DateTime
+//   times        String[]
+//   info         String[] @default([])
+//   available    Boolean  @default(false)
+//   appliedStaff String[] @default([])
+
+//   staffId   String
+//   companyId String
+//   staff     Staff   @relation(fields: [staffId], references: [id])
+//   company   Company @relation(fields: [companyId], references: [id])
+// }
