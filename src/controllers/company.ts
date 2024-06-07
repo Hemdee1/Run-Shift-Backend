@@ -138,27 +138,27 @@ const UpdateCompanyProfile: RequestHandler = async (req, res) => {
   const body = req.body;
   const profilePicture = body?.profilePicture;
 
-  try {
-    // if (profilePicture) {
-    //   const res = await cloudinaryUploadImage(body.profilePicture, id);
-    //   if (res?.secure_url) {
-    //     await prisma.company.update({
-    //       data: { profilePicture: res.secure_url },
-    //       where: { id },
-    //     });
-    //   } else {
-    //     throw Error("could not upload avatar");
-    //   }
-    // } else {
-    // }
+  // try {
+  //   if (profilePicture) {
+  //     const res = await cloudinaryUploadImage(body.profilePicture, id);
+  //     if (res?.secure_url) {
+  //       await prisma.company.update({
+  //         data: { profilePicture: res.secure_url },
+  //         where: { id },
+  //       });
+  //     } else {
+  //       throw Error("could not upload avatar");
+  //     }
+  //   } else {
+  //   }
 
-    await prisma.company.update({ data: { ...body }, where: { id } });
+  //   await prisma.company.update({ data: { ...body }, where: { id } });
 
-    res.status(201).json("information updated successfully");
-  } catch (error: any) {
-    console.log(error);
-    res.status(400).json(error.message);
-  }
+  //   res.status(201).json("information updated successfully");
+  // } catch (error: any) {
+  //   console.log(error);
+  //   res.status(400).json(error.message);
+  // }
 };
 
 const SendPasswordLink: RequestHandler = async (req, res) => {
@@ -307,13 +307,14 @@ const testLogin: RequestHandler = async (req, res) => {
     const user = await prisma.users.findUnique({ where: { email } });
 
     if (!user) {
-      throw Error("Incorrect email address");
+      return res.status(401).json("Incorrect user name or password")
+
     }
 
     const correctPassword = await bcrypt.compare(password, user.password);
 
     if (password !== user.password) {
-      throw Error("Incorrect password");
+      return res.status(401).json("Incorrect user name or password")
     }
 
     // initialize session
@@ -325,6 +326,10 @@ const testLogin: RequestHandler = async (req, res) => {
     console.log(error);
     res.status(400).json(error.message);
   }
+
+}
+
+const testImage: RequestHandler = async (req, res) => {
 
 }
 
