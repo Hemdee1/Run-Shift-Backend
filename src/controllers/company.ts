@@ -307,14 +307,15 @@ const testLogin: RequestHandler = async (req, res) => {
     const user = await prisma.users.findUnique({ where: { email } });
 
     if (!user) {
-      return res.status(401).json("Incorrect user name or password")
+      return res.status(401).json("No user found")
 
     }
 
     const correctPassword = await bcrypt.compare(password, user.password);
+    console.log(correctPassword);
 
-    if (password !== user.password) {
-      return res.status(401).json("Incorrect user name or password")
+    if (!correctPassword) {
+      return res.status(401).json("Wrong password")
     }
 
     // initialize session
@@ -328,6 +329,46 @@ const testLogin: RequestHandler = async (req, res) => {
   }
 
 }
+
+// Test sign up
+const testSignUp: RequestHandler = async (req, res) => {
+  let { name, email, password } = req.body;
+  email = email?.toLowerCase();
+
+  try {
+    if (!(name && email && password)) {
+      throw Error("All credentials must be included");
+    }
+
+    // check existing user
+    const existingUser = await prisma.users.findUnique({
+      where: { email },
+    });
+    if (existingUser) {
+      throw Error("User already exists, login instead");
+    }
+
+    // check password strength
+    if (password.length < 6) {
+      throw Error("Password must be at least 6 characters long");
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // create the user and save in the db
+    const user = await prisma.users.create({
+      data: {
+        name,
+        email,
+        password: hashedPassword,
+      },
+    });
+    res.status(200).json(user);
+  } catch (error: any) {
+    console.log(error);
+    res.status(400).json(error.message);
+  }
+};
 
 const testImage: RequestHandler = async (req, res) => {
 
@@ -345,4 +386,5 @@ export {
   getAllCompanies,
   getCompany,
   testLogin,
+  testSignUp,
 };
