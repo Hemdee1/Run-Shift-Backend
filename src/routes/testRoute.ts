@@ -7,6 +7,7 @@ const testRoute = Router();
 
 
 testRoute.post("/login", testController.testLogin);
+testRoute.post("/signup", testController.testSignUp);
 
 // companyRoute.post(
 //   "/update",
