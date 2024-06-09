@@ -9,6 +9,8 @@ import shiftRoute from "./routes/shift";
 import staffRoute from "./routes/staff";
 import notificationsRoute from "./routes/notifications";
 
+// Testing commit
+
 const app = express();
 const prisma = new PrismaClient();
 
@@ -35,6 +37,8 @@ const sessionStore = new PostgresqlStore({
   conString: process.env.DATABASE_URL,
   createTableIfMissing: true,
 });
+
+app.set("trust proxy", 1);
 
 app.use(
   session({

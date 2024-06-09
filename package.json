@@ -7,7 +7,10 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon ./src/app.ts",
     "migration": "npx prisma migrate dev --name init",
-    "studio": "npx prisma studio"
+    "studio": "npx prisma studio",
+    "start": "npx prisma migrate deploy & npm run dev",
+    "build": "tsc",
+    "prod": "node ./dist/app.js"
   },
   "keywords": [],
   "author": "",
