@@ -14,6 +14,8 @@ const prisma = new PrismaClient();
 
 const PORT = process.env.PORT || 5000;
 
+// Hello world
+
 const origin =
   process.env.NODE_ENV === "production" ? "" : "http://localhost:3000";
 
