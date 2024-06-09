@@ -10,7 +10,7 @@
     "studio": "npx prisma studio",
     "start": "npx prisma migrate deploy & npm run dev",
     "build": "tsc",
-    "prod": "node ./dist/application.js"
+    "prod": "node ./dist/app.js"
   },
   "keywords": [],
   "author": "",
