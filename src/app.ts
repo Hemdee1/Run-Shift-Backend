@@ -65,7 +65,7 @@ app.use("/company", companyRoute);
 app.use("/test", testRoute);
 app.use("/shifts", shiftRoute);
 app.use("/staff", staffRoute);
-app.use("/notification", notificationsRoute);
+app.use("/notifications", notificationsRoute);
 
 app.listen(PORT, () => {
   console.log("Express server is running on port " + PORT);

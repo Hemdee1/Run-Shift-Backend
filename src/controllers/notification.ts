@@ -14,4 +14,23 @@ const getNotifications: RequestHandler = async (req, res) => {
     }
 }
 
-export { getNotifications }
+const addNotification: RequestHandler = async (req, res) => {
+    console.log('hit');
+
+    try {
+        const newNotificationData = {
+            ...req.body
+        }
+
+        const notification = await prisma.notification.create({
+            data: newNotificationData
+        });
+
+        res.status(201).json(notification);
+    } catch (error: any) {
+        console.log(error);
+        res.status(400).json({ message: error.message });
+    }
+}
+
+export { getNotifications, addNotification }
