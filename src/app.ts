@@ -9,6 +9,8 @@ import shiftRoute from "./routes/shift";
 import staffRoute from "./routes/staff";
 import notificationsRoute from "./routes/notifications";
 
+// Testing commit
+
 const app = express();
 const prisma = new PrismaClient();
 
