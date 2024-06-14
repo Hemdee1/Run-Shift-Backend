@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import fileUpload from 'express-fileupload';
 import express, { Request, Response } from "express";
 import session from "express-session";
 import connectPg from "connect-pg-simple";
@@ -9,12 +10,14 @@ import shiftRoute from "./routes/shift";
 import staffRoute from "./routes/staff";
 import notificationsRoute from "./routes/notifications";
 
+
+
 // Testing commit
 
 const app = express();
 const prisma = new PrismaClient();
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 6000;
 
 // Hello world
 
@@ -39,6 +42,12 @@ const sessionStore = new PostgresqlStore({
 });
 
 app.set("trust proxy", 1);
+
+app.use(fileUpload({
+  useTempFiles: true,
+  tempFileDir: '/tmp/'
+}));
+
 
 app.use(
   session({

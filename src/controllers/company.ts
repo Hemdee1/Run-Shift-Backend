@@ -1,11 +1,17 @@
 import { PrismaClient } from "@prisma/client";
 import { RequestHandler } from "express";
 import bcrypt from "bcrypt";
-import { createToken, verifyToken } from "../utils/jwt";
+// import { createToken, verifyToken } from "../utils/jwt";
 import verifyEmailTemplate from "../emails/verifyEmail";
 // import sendMail from "../utils/sendMail";
 import { cloudinaryUploadImage } from "../utils/uploadImage";
 import resetPasswordEmailTemplate from "../emails/resetPasswordEmail";
+
+
+import { Request, Response } from 'express';
+
+
+
 
 const url =
   process.env.NODE_ENV === "production" ? "https://" : "http://localhost:3000";
@@ -47,7 +53,8 @@ const SignUp: RequestHandler = async (req, res) => {
     });
 
     // send a link to verify email
-    const token = createToken(company.id);
+    // const token = createToken(company.id);
+    const token = 'createToken(company.id);'
     const link = `${url}/verify-email?token=${token}`;
 
     const data = {
@@ -88,7 +95,7 @@ const LogIn: RequestHandler = async (req, res) => {
 
     if (!company.verified) {
       // send a link to verify email
-      const token = createToken(company.id);
+      const token = 'createToken(company.id);'
       const link = `${url}/verify-email?token=${token}`;
 
       const data = {
@@ -116,7 +123,7 @@ const VerifyEmail: RequestHandler = async (req, res) => {
   const token = req.params.token;
 
   try {
-    const id = verifyToken(token);
+    const id = 'verifyToken(token);'
 
     if (!id) {
       throw Error(
@@ -175,7 +182,7 @@ const SendPasswordLink: RequestHandler = async (req, res) => {
       throw Error("Company not found!");
     }
 
-    const token = createToken(company.id);
+    const token = 'createToken(company.id);'
     const link = `${url}/reset-password?token=${token}`;
 
     const data = {
@@ -211,7 +218,7 @@ const ChangePassword: RequestHandler = async (req, res) => {
       throw Error("Password must be at least 8 characters long");
     }
 
-    const id = verifyToken(token);
+    const id = ' verifyToken(token)';
 
     if (!id) {
       throw Error(
@@ -370,12 +377,54 @@ const testSignUp: RequestHandler = async (req, res) => {
   }
 };
 
+// Test image upload
+const uploadImageToCloudinary: RequestHandler = async (req: Request, res: Response) => {
+  console.log('route hit');
+
+  const image = req.body.blob;
+  const id = Math.random() + '10'
+  // console.log(image);
+
+  // const imageBuffer: any = Buffer.from(req.body._data.blobId, 'base64');
+  // console.log(imageBuffer);
+
+
+
+  try {
+    // if (!userId) {
+    //   // res.status(500).json("user not authenticated");
+    //   throw Error("user not authenticated");
+    // }
+    if (image) {
+      const res = await cloudinaryUploadImage(image, id);
+      if (res?.secure_url) {
+        console.log(res.secure_url);
+
+      } else {
+        throw Error("Image upload failed");
+      }
+    } else {
+      console.log('no image object passed');
+
+    }
+
+    res.status(201).json("information upgraded successfully");
+  } catch (error: any) {
+    console.log(error);
+    res.status(400).json(error.message);
+  }
+
+
+};
+
+
 const testImage: RequestHandler = async (req, res) => {
 
 }
 
 export {
   SignUp,
+  uploadImageToCloudinary,
   LogIn,
   VerifyEmail,
   UpdateCompanyProfile,
