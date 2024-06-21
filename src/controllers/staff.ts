@@ -6,7 +6,7 @@ const prisma = new PrismaClient();
 const getStaff: RequestHandler = async (req, res) => {
 
     try {
-        const staff = await prisma.users.findMany();
+        const staff = await prisma.staff.findMany();
         res.status(200).json(staff);
     } catch (error: any) {
         console.log(error);

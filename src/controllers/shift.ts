@@ -8,7 +8,7 @@ const getShifts: RequestHandler = async (req, res) => {
     try {
         const shift = await prisma.shift.findMany({
             include: {
-                user: true
+                staff: true
             }
         });
         res.status(200).json(shift);

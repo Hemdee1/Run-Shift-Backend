@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import { RequestHandler } from "express";
+import { RequestHandler, Request, Response } from "express";
 import bcrypt from "bcrypt";
 // import { createToken, verifyToken } from "../utils/jwt";
 import verifyEmailTemplate from "../emails/verifyEmail";
@@ -7,8 +7,6 @@ import verifyEmailTemplate from "../emails/verifyEmail";
 import { cloudinaryUploadImage } from "../utils/uploadImage";
 import resetPasswordEmailTemplate from "../emails/resetPasswordEmail";
 
-
-import { Request, Response } from 'express';
 
 
 
@@ -18,11 +16,11 @@ const url =
 const prisma = new PrismaClient();
 
 const SignUp: RequestHandler = async (req, res) => {
-  let { firstName, lastName, email, companyName, password } = req.body;
+  let { managersFirstName, managersLastName, email, companyName, password } = req.body;
   email = email?.toLowerCase();
 
   try {
-    if (!(firstName && lastName && email && password && companyName)) {
+    if (!(managersFirstName && managersLastName && email && password && companyName)) {
       throw Error("All credentials must be included");
     }
 
@@ -44,13 +42,28 @@ const SignUp: RequestHandler = async (req, res) => {
     // create the company and save in the db
     const company = await prisma.company.create({
       data: {
-        firstName,
-        lastName,
+        managersFirstName,
+        managersLastName,
         email,
         companyName,
         password: hashedPassword,
       },
     });
+
+    const manager = await prisma.staff.create({
+      data: {
+        firstName: managersFirstName,
+        lastName: managersLastName,
+        email,
+        company: {
+          connect: {
+            id: company.id,
+          },
+        },
+        password: hashedPassword,
+        role: "manager",
+      }
+    })
 
     // send a link to verify email
     // const token = createToken(company.id);
@@ -72,6 +85,66 @@ const SignUp: RequestHandler = async (req, res) => {
   }
 };
 
+const AddStaff: RequestHandler = async (req, res) => {
+  let { firstName, lastName, companyEmail, companyPassword, newStaffEmail, role } = req.body;
+  companyEmail = companyEmail?.toLowerCase();
+  newStaffEmail = newStaffEmail?.toLowerCase();
+
+  try {
+    if (!(firstName && lastName && companyEmail && companyPassword && newStaffEmail && role)) {
+      throw Error("All credentials must be included");
+    }
+
+    // Check if company exists
+    const company = await prisma.company.findUnique({
+      where: { email: companyEmail },
+    });
+    if (!company) {
+      throw Error("Company does not exist");
+    }
+
+    // Verify the company password
+    const isPasswordValid = await bcrypt.compare(companyPassword, company.password);
+    if (!isPasswordValid) {
+      throw Error("Invalid password");
+    }
+
+    // Check if the person adding the staff is a manager
+    const manager = await prisma.staff.findFirst({
+      where: {
+        email: companyEmail,
+        companyId: company.id,
+        role: "manager",
+      },
+    });
+    if (!manager) {
+      throw Error("Only a manager can add new staff");
+    }
+
+    // Add the new staff to the company
+    const hashedPassword = await bcrypt.hash(companyPassword, 10); // Assuming new staff will use the same password
+    const staff = await prisma.staff.create({
+      data: {
+        firstName,
+        lastName,
+        email: newStaffEmail,
+        company: {
+          connect: {
+            id: company.id,
+          },
+        },
+        password: hashedPassword,
+        role,
+      },
+    });
+
+    res.status(200).json(staff);
+  } catch (error: any) {
+    console.log(error);
+    res.status(400).json(error.message);
+  }
+};
+
 const LogIn: RequestHandler = async (req, res) => {
   let { email, password } = req.body;
   email = email.toLowerCase();
@@ -81,38 +154,43 @@ const LogIn: RequestHandler = async (req, res) => {
       throw Error("All credentials must be included");
     }
 
-    const company = await prisma.company.findUnique({ where: { email } });
+    const staff = await prisma.staff.findUnique({ where: { email } });
+    console.log(staff);
 
-    if (!company) {
+
+    if (!staff) {
+      console.log(staff);
+
       throw Error("Incorrect credentials");
     }
 
-    const correctPassword = await bcrypt.compare(password, company.password);
+    const correctPassword = await bcrypt.compare(password, staff.password);
 
     if (!correctPassword) {
       throw Error("Incorrect credentials");
     }
 
-    if (!company.verified) {
-      // send a link to verify email
-      const token = 'createToken(company.id);'
-      const link = `${url}/verify-email?token=${token}`;
+    // Check role, if manager send verification email again
+    // if (!company.verified) {
+    //   // send a link to verify email
+    //   const token = 'createToken(company.id);'
+    //   const link = `${url}/verify-email?token=${token}`;
 
-      const data = {
-        email: company.email,
-        subject: "Verify your account",
-        html: verifyEmailTemplate({ firstName: company.companyName, link }),
-      };
+    //   const data = {
+    //     email: company.email,
+    //     subject: "Verify your account",
+    //     html: verifyEmailTemplate({ firstName: company.companyName, link }),
+    //   };
 
-      // await sendMail(data);
+    //   // await sendMail(data);
 
-      throw Error("Email is not verified!");
-    }
+    //   throw Error("Email is not verified!");
+    // }
 
     // initialize session
-    req.session.id = company.id;
+    // req.session.id = staff.id;
 
-    res.status(200).json(company);
+    res.status(200).json(staff);
   } catch (error: any) {
     console.log(error);
     res.status(400).json(error.message);
@@ -299,83 +377,83 @@ const getAllCompanies: RequestHandler = async (req, res) => {
 };
 
 // Test login function
-const testLogin: RequestHandler = async (req, res) => {
-  interface CustomSessionData {
-    userId?: string;
-  }
-  let { email, password } = req.body;
-  email = email.toLowerCase();
-  console.log(email, password);
-  try {
-    if (!(email && password)) {
-      throw Error("All credentials must be included");
-    }
+// const testLogin: RequestHandler = async (req, res) => {
+//   interface CustomSessionData {
+//     userId?: string;
+//   }
+//   let { email, password } = req.body;
+//   email = email.toLowerCase();
+//   console.log(email, password);
+//   try {
+//     if (!(email && password)) {
+//       throw Error("All credentials must be included");
+//     }
 
-    const user = await prisma.users.findUnique({ where: { email } });
+//     const user = await prisma.users.findUnique({ where: { email } });
 
-    if (!user) {
-      return res.status(401).json("No user found")
+//     if (!user) {
+//       return res.status(401).json("No user found")
 
-    }
+//     }
 
-    const correctPassword = await bcrypt.compare(password, user.password);
-    console.log(correctPassword);
+//     const correctPassword = await bcrypt.compare(password, user.password);
+//     console.log(correctPassword);
 
-    if (!correctPassword) {
-      return res.status(401).json("Wrong password")
-    }
+//     if (!correctPassword) {
+//       return res.status(401).json("Wrong password")
+//     }
 
-    // initialize session
-    (req.session as CustomSessionData).userId = user.id;
-    console.log(user)
+//     // initialize session
+//     (req.session as CustomSessionData).userId = user.id;
+//     console.log(user)
 
-    res.status(200).json(user);
-  } catch (error: any) {
-    console.log(error);
-    res.status(400).json(error.message);
-  }
+//     res.status(200).json(user);
+//   } catch (error: any) {
+//     console.log(error);
+//     res.status(400).json(error.message);
+//   }
 
-}
+// }
 
 // Test sign up
-const testSignUp: RequestHandler = async (req, res) => {
-  let { name, email, password } = req.body;
-  email = email?.toLowerCase();
+// const testSignUp: RequestHandler = async (req, res) => {
+//   let { name, email, password } = req.body;
+//   email = email?.toLowerCase();
 
-  try {
-    if (!(name && email && password)) {
-      throw Error("All credentials must be included");
-    }
+//   try {
+//     if (!(name && email && password)) {
+//       throw Error("All credentials must be included");
+//     }
 
-    // check existing user
-    const existingUser = await prisma.users.findUnique({
-      where: { email },
-    });
-    if (existingUser) {
-      throw Error("User already exists, login instead");
-    }
+//     // check existing user
+//     const existingUser = await prisma.users.findUnique({
+//       where: { email },
+//     });
+//     if (existingUser) {
+//       throw Error("User already exists, login instead");
+//     }
 
-    // check password strength
-    if (password.length < 6) {
-      throw Error("Password must be at least 6 characters long");
-    }
+//     // check password strength
+//     if (password.length < 6) {
+//       throw Error("Password must be at least 6 characters long");
+//     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+//     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // create the user and save in the db
-    const user = await prisma.users.create({
-      data: {
-        name,
-        email,
-        password: hashedPassword,
-      },
-    });
-    res.status(200).json(user);
-  } catch (error: any) {
-    console.log(error);
-    res.status(400).json(error.message);
-  }
-};
+//     // create the user and save in the db
+//     const user = await prisma.users.create({
+//       data: {
+//         name,
+//         email,
+//         password: hashedPassword,
+//       },
+//     });
+//     res.status(200).json(user);
+//   } catch (error: any) {
+//     console.log(error);
+//     res.status(400).json(error.message);
+//   }
+// };
 
 // Test image upload
 const uploadImageToCloudinary: RequestHandler = async (req: Request, res: Response) => {
@@ -434,6 +512,7 @@ export {
   LogOut,
   getAllCompanies,
   getCompany,
-  testLogin,
-  testSignUp,
+  AddStaff
+  // testLogin,
+  // testSignUp,
 };

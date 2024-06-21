@@ -6,8 +6,8 @@ const testRoute = Router();
 
 
 
-testRoute.post("/login", testController.testLogin);
-testRoute.post("/signup", testController.testSignUp);
+// testRoute.post("/login", testController.testLogin);
+// testRoute.post("/signup", testController.testSignUp);
 testRoute.post("/upload", testController.uploadImageToCloudinary);
 
 // companyRoute.post(
