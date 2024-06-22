@@ -77,5 +77,7 @@ app.use("/staff", staffRoute);
 app.use("/notifications", notificationsRoute);
 
 app.listen(PORT, () => {
+  console.log(process.env.DATABASE_URL);
+
   console.log("Express server is running on port " + PORT);
 });
