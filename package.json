@@ -8,7 +8,7 @@
     "dev": "nodemon ./src/app.ts",
     "migration": "npx prisma migrate dev --name init",
     "studio": "npx prisma studio",
-    "start": "npx prisma migrate deploy & npm run dev",
+    "start": "prisma migrate resolve --rolled-back 20240622091600_init & npm run dev",
     "build": "tsc",
     "prod": "node ./dist/app.js"
   },
