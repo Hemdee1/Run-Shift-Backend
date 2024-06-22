@@ -7,10 +7,6 @@ import verifyEmailTemplate from "../emails/verifyEmail";
 import { cloudinaryUploadImage } from "../utils/uploadImage";
 import resetPasswordEmailTemplate from "../emails/resetPasswordEmail";
 
-
-
-
-
 const url =
   process.env.NODE_ENV === "production" ? "https://" : "http://localhost:3000";
 const prisma = new PrismaClient();
@@ -155,11 +151,9 @@ const LogIn: RequestHandler = async (req, res) => {
     }
 
     const staff = await prisma.staff.findUnique({ where: { email } });
-    console.log(staff);
 
 
     if (!staff) {
-      console.log(staff);
 
       throw Error("Incorrect credentials");
     }
