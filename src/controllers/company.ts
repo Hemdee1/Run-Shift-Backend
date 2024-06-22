@@ -11,30 +11,31 @@ const url =
   process.env.NODE_ENV === "production" ? "https://" : "http://localhost:3000";
 const prisma = new PrismaClient();
 
-
 const SignUp: RequestHandler = async (req, res) => {
   let { managersFirstName, managersLastName, email, companyName, password } = req.body;
   email = email?.toLowerCase();
 
   try {
     if (!(managersFirstName && managersLastName && email && password && companyName)) {
-      throw new Error("All credentials must be included");
+      throw Error("All credentials must be included");
     }
 
-    // Check for existing company
-    const existingCompany = await prisma.company.findUnique({ where: { email } });
+    // check existing company
+    const existingCompany = await prisma.company.findUnique({
+      where: { email },
+    });
     if (existingCompany) {
-      throw new Error("Company already exists, login instead");
+      throw Error("Company already exists, login instead");
     }
 
-    // Check password strength
+    // check password strength
     if (password.length < 8) {
-      throw new Error("Password must be at least 8 characters long");
+      throw Error("Password must be at least 8 characters long");
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create the company and save in the db
+    // create the company and save in the db
     const company = await prisma.company.create({
       data: {
         managersFirstName,
@@ -45,41 +46,40 @@ const SignUp: RequestHandler = async (req, res) => {
       },
     });
 
-    // Create the manager associated with the company
     const manager = await prisma.staff.create({
       data: {
         firstName: managersFirstName,
         lastName: managersLastName,
         email,
-        companyId: company.id,
+        company: {
+          connect: {
+            id: company.id,
+          },
+        },
         password: hashedPassword,
         role: "manager",
-      },
-    });
+      }
+    })
 
-    // Send a link to verify email
+    // send a link to verify email
     // const token = createToken(company.id);
-    const token = 'createToken(company.id);'; // Replace with actual token generation
-    const link = `${url}/verify-email?token=${token}`; // Ensure `url` is defined
+    const token = 'createToken(company.id);'
+    const link = `${url}/verify-email?token=${token}`;
 
     const data = {
       email: company.email,
       subject: "Verify your account",
-      html: verifyEmailTemplate({ firstName: company.companyName, link }), // Ensure `verifyEmailTemplate` is defined
+      html: verifyEmailTemplate({ firstName: company.companyName, link }),
     };
 
-    // Uncomment the following line to send an email
     // await sendMail(data);
 
     res.status(200).json(company);
   } catch (error: any) {
     console.log(error);
-    res.status(400).json({ message: error.message });
+    res.status(400).json(error.message);
   }
 };
-
-export default SignUp;
-
 
 const AddStaff: RequestHandler = async (req, res) => {
   let { firstName, lastName, companyEmail, companyPassword, newStaffEmail, role } = req.body;

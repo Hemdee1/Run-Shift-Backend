@@ -5,8 +5,8 @@ CREATE TABLE "Company" (
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "email" TEXT NOT NULL,
     "companyName" TEXT NOT NULL,
-    "firstName" TEXT NOT NULL,
-    "lastName" TEXT NOT NULL,
+    "managersFirstName" TEXT NOT NULL,
+    "managersLastName" TEXT NOT NULL,
     "password" TEXT NOT NULL,
     "verified" BOOLEAN NOT NULL DEFAULT false,
 
@@ -22,9 +22,19 @@ CREATE TABLE "Staff" (
     "firstName" TEXT NOT NULL,
     "lastName" TEXT NOT NULL,
     "password" TEXT NOT NULL,
+    "role" TEXT NOT NULL,
     "companyId" TEXT NOT NULL,
 
     CONSTRAINT "Staff_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Notification" (
+    "id" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "notification" TEXT NOT NULL,
+
+    CONSTRAINT "Notification_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
