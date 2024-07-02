@@ -7,7 +7,6 @@ const companyRoute = Router();
 companyRoute.get("/autologin", checkAuthCompany, companyController.AutoLogin);
 
 companyRoute.post("/signup", companyController.SignUp);
-companyRoute.post("/addstaff", companyController.AddStaff);
 
 companyRoute.post("/login", companyController.LogIn);
 
