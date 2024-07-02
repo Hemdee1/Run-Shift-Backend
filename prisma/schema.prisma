@@ -1,7 +1,6 @@
 datasource db {
   provider = "postgresql"
-  url      = "postgresql://postgres:blackwolf@localhost:5432/runshift"
-  // url      = env("DATABASE_URL")
+  url      = env("DATABASE_URL")
 }
 
 generator client {
@@ -79,4 +78,14 @@ model Shift {
   companyId String
   staff     Staff   @relation(fields: [staffId], references: [id])
   company   Company @relation(fields: [companyId], references: [id])
+}
+
+
+model ImageUrl {
+  id           String   @id @default(uuid())
+  url String
+  created_at String
+  bytes Int
+  publicId String
+  email String
 }

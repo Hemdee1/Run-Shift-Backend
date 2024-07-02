@@ -10,6 +10,10 @@ companyRoute.post("/signup", companyController.SignUp);
 
 companyRoute.post("/login", companyController.LogIn);
 
+companyRoute.post("/imgurlupload", companyController.SaveCloudinaryUrl);
+
+companyRoute.get("/imgurl/:id", companyController.getCloudinaryUrl);
+
 companyRoute.post(
   "/update",
   checkAuthCompany,

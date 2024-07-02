@@ -5,10 +5,10 @@ import session from "express-session";
 import connectPg from "connect-pg-simple";
 import cors from "cors";
 import companyRoute from "./routes/company";
-import testRoute from "./routes/testRoute";
 import shiftRoute from "./routes/shift";
 import staffRoute from "./routes/staff";
 import notificationsRoute from "./routes/notifications";
+import chatRoute from "./routes/chat";
 
 
 
@@ -71,13 +71,13 @@ app.get("/", async (req: Request, res: Response) => {
 });
 
 app.use("/company", companyRoute);
-app.use("/test", testRoute);
 app.use("/shifts", shiftRoute);
 app.use("/staff", staffRoute);
 app.use("/notifications", notificationsRoute);
+app.use("/chats", chatRoute);
 
 app.listen(PORT, () => {
-  console.log(process.env.DATABASE_URL);
+  console.log(process.env.DATABASE_URL, 'database');
 
   console.log("Express server is running on port " + PORT);
 });

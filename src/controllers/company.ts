@@ -312,133 +312,77 @@ const getAllCompanies: RequestHandler = async (req, res) => {
   }
 };
 
-// Test login function
-// const testLogin: RequestHandler = async (req, res) => {
-//   interface CustomSessionData {
-//     userId?: string;
-//   }
-//   let { email, password } = req.body;
-//   email = email.toLowerCase();
-//   console.log(email, password);
-//   try {
-//     if (!(email && password)) {
-//       throw Error("All credentials must be included");
-//     }
 
-//     const user = await prisma.users.findUnique({ where: { email } });
-
-//     if (!user) {
-//       return res.status(401).json("No user found")
-
-//     }
-
-//     const correctPassword = await bcrypt.compare(password, user.password);
-//     console.log(correctPassword);
-
-//     if (!correctPassword) {
-//       return res.status(401).json("Wrong password")
-//     }
-
-//     // initialize session
-//     (req.session as CustomSessionData).userId = user.id;
-//     console.log(user)
-
-//     res.status(200).json(user);
-//   } catch (error: any) {
-//     console.log(error);
-//     res.status(400).json(error.message);
-//   }
-
-// }
-
-// Test sign up
-// const testSignUp: RequestHandler = async (req, res) => {
-//   let { name, email, password } = req.body;
-//   email = email?.toLowerCase();
-
-//   try {
-//     if (!(name && email && password)) {
-//       throw Error("All credentials must be included");
-//     }
-
-//     // check existing user
-//     const existingUser = await prisma.users.findUnique({
-//       where: { email },
-//     });
-//     if (existingUser) {
-//       throw Error("User already exists, login instead");
-//     }
-
-//     // check password strength
-//     if (password.length < 6) {
-//       throw Error("Password must be at least 6 characters long");
-//     }
-
-//     const hashedPassword = await bcrypt.hash(password, 10);
-
-//     // create the user and save in the db
-//     const user = await prisma.users.create({
-//       data: {
-//         name,
-//         email,
-//         password: hashedPassword,
-//       },
-//     });
-//     res.status(200).json(user);
-//   } catch (error: any) {
-//     console.log(error);
-//     res.status(400).json(error.message);
-//   }
-// };
-
-// Test image upload
-const uploadImageToCloudinary: RequestHandler = async (req: Request, res: Response) => {
+const SaveCloudinaryUrl: RequestHandler = async (req: Request, res: Response) => {
   console.log('route hit');
-
-  const image = req.body.blob;
-  const id = Math.random() + '10'
-  // console.log(image);
-
-  // const imageBuffer: any = Buffer.from(req.body._data.blobId, 'base64');
-  // console.log(imageBuffer);
-
-
+  let { url, created_at, bytes, email, publicId } = req.body;
 
   try {
-    // if (!userId) {
-    //   // res.status(500).json("user not authenticated");
-    //   throw Error("user not authenticated");
-    // }
-    if (image) {
-      const res = await cloudinaryUploadImage(image, id);
-      if (res?.secure_url) {
-        console.log(res.secure_url);
-
-      } else {
-        throw Error("Image upload failed");
-      }
-    } else {
-      console.log('no image object passed');
-
+    if (!(url && created_at && bytes && email && publicId)) {
+      throw Error("All credentials must be included");
     }
 
-    res.status(201).json("information upgraded successfully");
+    // check existing company
+    const existingCompany = await prisma.company.findUnique({
+      where: { email },
+    });
+    if (!existingCompany) {
+      throw Error("Company doesn't exists");
+    }
+
+    // create the url and save in the db
+    const imageUrl = await prisma.imageUrl.create({
+      data: {
+        url, created_at, bytes, publicId, email
+      },
+    });
+
+    res.status(200).json(imageUrl);
   } catch (error: any) {
     console.log(error);
     res.status(400).json(error.message);
   }
+}
 
+const getCloudinaryUrl: RequestHandler = async (req: Request, res: Response) => {
+  console.log('Route hit');
+  const { id: email } = req.params;
 
+  console.log(req.params);
+  
+
+  try {
+    if (!email) {
+      return res.status(401).json({ error: "User not authenticated" });
+    }
+
+    // Check if the company exists
+    const existingCompany = await prisma.company.findUnique({
+      where: { email },
+    });
+
+    if (!existingCompany) {
+      return res.status(404).json({ error: "Company doesn't exist" });
+    }
+
+    // Fetch all images associated with the company email
+    const images = await prisma.imageUrl.findMany({
+      where: { email },
+    });
+
+    res.status(200).json(images);
+  } catch (error:any) {
+    console.error(error);
+    res.status(500).json({ error: error.message });
+  }
 };
 
 
-const testImage: RequestHandler = async (req, res) => {
-
-}
 
 export {
   SignUp,
-  uploadImageToCloudinary,
+  SaveCloudinaryUrl,
+  getCloudinaryUrl,
   LogIn,
   VerifyEmail,
   UpdateCompanyProfile,
