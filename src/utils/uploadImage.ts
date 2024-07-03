@@ -8,9 +8,9 @@ const cloudinaryUploadImage = async (
 ): Promise<cloud.UploadApiResponse | null> => {
   // Configuration
   cloudinary.config({
-    cloud_name: 'cloudinary',
-    api_key: '455767718212827',
-    api_secret: 'Vt4RBo795emx3iEZ0GR3hr1LJbw',
+    cloud_name: process.env.CLOUD_NAME,
+    api_key: process.env.API_KEY,
+    api_secret: process.env.API_SECRET,
   });
 
   try {

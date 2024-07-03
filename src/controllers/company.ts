@@ -4,7 +4,7 @@ import bcrypt from "bcrypt";
 // import { createToken, verifyToken } from "../utils/jwt";
 import verifyEmailTemplate from "../emails/verifyEmail";
 // import sendMail from "../utils/sendMail";
-import { cloudinaryUploadImage } from "../utils/uploadImage";
+import { cloudinaryDeleteImage, cloudinaryUploadImage } from "../utils/uploadImage";
 import resetPasswordEmailTemplate from "../emails/resetPasswordEmail";
 
 const url =
@@ -344,6 +344,36 @@ const SaveCloudinaryUrl: RequestHandler = async (req: Request, res: Response) =>
   }
 }
 
+const deleteImage: RequestHandler = async (req: Request, res: Response) => {
+  console.log('delete image route hit');
+  const { publicId } = req.body;
+
+  try {
+    // Check if the image exists in the Prisma database
+    const existingImage = await prisma.imageUrl.findUnique({
+      where: { publicId },
+    });
+
+    if (!existingImage) {
+      return res.status(404).json({ message: 'Image not found in the database' });
+    }
+
+    // Delete the image from Cloudinary
+    const result = await cloudinaryDeleteImage(publicId);
+
+    // Delete the image from the Prisma database
+    await prisma.imageUrl.delete({
+      where: { publicId },
+    });
+
+    res.status(200).json({ message: 'Image deleted successfully', result });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Failed to delete image', error });
+  }
+}
+
+
 const getCloudinaryUrl: RequestHandler = async (req: Request, res: Response) => {
   console.log('Route hit');
   const { id: email } = req.params;
@@ -392,6 +422,6 @@ export {
   LogOut,
   getAllCompanies,
   getCompany,
-
+deleteImage,
 
 };

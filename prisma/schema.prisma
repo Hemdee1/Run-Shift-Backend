@@ -68,24 +68,20 @@ model Notification {
 
 model Shift {
   id           String   @id @default(uuid())
-  date         DateTime
-  times        String[]
-  info         String[] @default([])
-  available    Boolean  @default(false)
-  appliedStaff String[] @default([])
-
+  date         String
+  description         String[] @default([])
   staffId   String
-  companyId String
+  companyId String 
   staff     Staff   @relation(fields: [staffId], references: [id])
   company   Company @relation(fields: [companyId], references: [id])
 }
 
 
 model ImageUrl {
-  id           String   @id @default(uuid())
-  url String
-  created_at String
+  id        String   @id @default(uuid())
+  url       String
+  publicId  String   @unique
+ created_at String
+  email     String
   bytes Int
-  publicId String
-  email String
 }

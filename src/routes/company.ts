@@ -11,6 +11,7 @@ companyRoute.post("/signup", companyController.SignUp);
 companyRoute.post("/login", companyController.LogIn);
 
 companyRoute.post("/imgurlupload", companyController.SaveCloudinaryUrl);
+companyRoute.post("/deleteimage", companyController.deleteImage);
 
 companyRoute.get("/imgurl/:id", companyController.getCloudinaryUrl);
 
