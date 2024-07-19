@@ -84,6 +84,8 @@ const SignUp: RequestHandler = async (req, res) => {
 
 
 const LogIn: RequestHandler = async (req, res) => {
+  console.log('request hit');
+  
   let { email, password } = req.body;
   email = email.toLowerCase();
 
