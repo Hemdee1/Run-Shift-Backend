@@ -8,11 +8,9 @@
     "dev": "nodemon ./src/app.ts",
     "migration": "npx prisma migrate dev --name init",
     "studio": "npx prisma studio",
-    "start": "npm install && npm run resolve-migration && npm run deploy && npm run dev",
+    "start": "npx prisma migrate deploy & npm run dev",
     "build": "tsc",
-    "prod": "node ./dist/app.js",
-    "resolve-migration": "npx prisma migrate resolve --applied 20240703155850_changed_id",
-    "deploy": "npx prisma migrate deploy"
+    "prod": "node ./dist/app.js"
   },
   "keywords": [],
   "author": "",
