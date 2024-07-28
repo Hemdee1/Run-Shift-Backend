@@ -62,11 +62,8 @@ CREATE TABLE "Notification" (
 -- CreateTable
 CREATE TABLE "Shift" (
     "id" TEXT NOT NULL,
-    "date" TIMESTAMP(3) NOT NULL,
-    "times" TEXT[],
-    "info" TEXT[] DEFAULT ARRAY[]::TEXT[],
-    "available" BOOLEAN NOT NULL DEFAULT false,
-    "appliedStaff" TEXT[] DEFAULT ARRAY[]::TEXT[],
+    "date" TEXT NOT NULL,
+    "description" TEXT[] DEFAULT ARRAY[]::TEXT[],
     "staffId" TEXT NOT NULL,
     "companyId" TEXT NOT NULL,
 
@@ -77,9 +74,10 @@ CREATE TABLE "Shift" (
 CREATE TABLE "ImageUrl" (
     "id" TEXT NOT NULL,
     "url" TEXT NOT NULL,
-    "created_at" TEXT NOT NULL,
-    "bytes" INTEGER NOT NULL,
     "publicId" TEXT NOT NULL,
+    "created_at" TEXT NOT NULL,
+    "email" TEXT NOT NULL,
+    "bytes" INTEGER NOT NULL,
 
     CONSTRAINT "ImageUrl_pkey" PRIMARY KEY ("id")
 );
@@ -89,6 +87,9 @@ CREATE UNIQUE INDEX "Company_email_key" ON "Company"("email");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Staff_email_key" ON "Staff"("email");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "ImageUrl_publicId_key" ON "ImageUrl"("publicId");
 
 -- AddForeignKey
 ALTER TABLE "Staff" ADD CONSTRAINT "Staff_companyId_fkey" FOREIGN KEY ("companyId") REFERENCES "Company"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
