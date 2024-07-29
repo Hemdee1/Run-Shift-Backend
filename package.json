@@ -8,10 +8,10 @@
     "dev": "nodemon ./src/app.ts",
     "migration": "npx prisma migrate dev --name init",
     "studio": "npx prisma studio",
-    "start": " npx prisma migrate deploy & npm run prod",
+    "start": " npx prisma migrate deploy & npm run dev",
    
     "build": "npx prisma generate && tsc",
-    "prod": "node app.ts"
+    "prod": "node ./dist/app.js"
   },
   "keywords": [],
   "author": "",
