@@ -11,7 +11,7 @@
     "start": " npx prisma migrate deploy & npm run prod",
    
     "build": "npx prisma generate && tsc",
-    "prod": "node app.js"
+    "prod": "node app.ts"
   },
   "keywords": [],
   "author": "",
