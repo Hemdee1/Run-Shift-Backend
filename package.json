@@ -4,11 +4,12 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-     "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon ./src/app.ts",
     "migration": "npx prisma migrate dev --name init",
     "studio": "npx prisma studio",
-    "start": "npm run build && npm run prod",
+    "start": " npx prisma migrate deploy & npm run dev",
+   
     "build": "npx prisma generate && tsc",
     "prod": "node ./dist/app.js"
   },
@@ -24,12 +25,12 @@
     "@types/jsonwebtoken": "^9.0.6",
     "@types/multer": "^1.4.11",
     "@types/node": "^20.12.10",
-    "prisma": "^5.13.0",
+    "prisma": "^5.17.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.4.5"
   },
   "dependencies": {
-    "@prisma/client": "^5.13.0",
+    "@prisma/client": "^5.17.0",
     "@types/express-session": "^1.18.0",
     "bcrypt": "^5.1.1",
     "cloudinary": "^2.2.0",
