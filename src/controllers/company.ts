@@ -317,16 +317,19 @@ const getAllCompanies: RequestHandler = async (req, res) => {
 
 const SaveCloudinaryUrl: RequestHandler = async (req: Request, res: Response) => {
   console.log('route hit');
-  let { url, created_at, bytes, email, publicId } = req.body;
+  let { url, created_at, bytes, companyId, publicId, company } = req.body;
+
+  console.log(companyId);
+  
 
   try {
-    if (!(url && created_at && bytes && email && publicId)) {
+    if (!(url && created_at && bytes && companyId && publicId)) {
       throw Error("All credentials must be included");
     }
 
     // check existing company
     const existingCompany = await prisma.company.findUnique({
-      where: { email },
+      where: { id: companyId },
     });
     if (!existingCompany) {
       throw Error("Company doesn't exists");
@@ -335,7 +338,11 @@ const SaveCloudinaryUrl: RequestHandler = async (req: Request, res: Response) =>
     // create the url and save in the db
     const imageUrl = await prisma.imageUrl.create({
       data: {
-        url, created_at, bytes, publicId, email
+        url, created_at, bytes, publicId,  company: {
+                    connect: {
+                        id: companyId,
+                    },
+                },
       },
     });
 
@@ -378,20 +385,23 @@ const deleteImage: RequestHandler = async (req: Request, res: Response) => {
 
 const getCloudinaryUrl: RequestHandler = async (req: Request, res: Response) => {
   console.log('Route hit');
-  const { id: email } = req.params;
+  const { id } = req.params;
 
   console.log(req.params);
   
 
   try {
-    if (!email) {
+    if (!id) {
       return res.status(401).json({ error: "User not authenticated" });
     }
 
     // Check if the company exists
     const existingCompany = await prisma.company.findUnique({
-      where: { email },
+      where: { id },
     });
+
+    console.log(existingCompany);
+    
 
     if (!existingCompany) {
       return res.status(404).json({ error: "Company doesn't exist" });
@@ -399,7 +409,7 @@ const getCloudinaryUrl: RequestHandler = async (req: Request, res: Response) => 
 
     // Fetch all images associated with the company email
     const images = await prisma.imageUrl.findMany({
-      where: { email },
+      where: {companyId:id },
     });
 
     res.status(200).json(images);

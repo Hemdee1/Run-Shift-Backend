@@ -8,7 +8,6 @@ datasource db {
   url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
-        
 
 generator client {
   provider = "prisma-client-js"
@@ -27,6 +26,7 @@ model Company {
   verified          Boolean @default(false)
   staffs            Staff[]
   shifts            Shift[]
+  images            ImageUrl[]
 }
 
 model Staff {
@@ -34,7 +34,7 @@ model Staff {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
 
-  email     String   @unique
+  email     String @unique
   firstName String
   lastName  String
   password  String
@@ -48,13 +48,13 @@ model Staff {
 }
 
 model Post {
-  id         String   @id @default(uuid())
-  title      String
-  content    String?
-  createdAt  DateTime @default(now())
-  authorId   String
-  author     Staff    @relation(fields: [authorId], references: [id])
-  chats      Chat[]
+  id        String   @id @default(uuid())
+  title     String
+  content   String?
+  createdAt DateTime @default(now())
+  authorId  String
+  author    Staff    @relation(fields: [authorId], references: [id])
+  chats     Chat[]
 }
 
 model Chat {
@@ -74,21 +74,22 @@ model Notification {
 }
 
 model Shift {
-  id           String   @id @default(uuid())
-  date         String
-  description         String[] @default([])
-  staffId   String
-  companyId String 
-  staff     Staff   @relation(fields: [staffId], references: [id])
-  company   Company @relation(fields: [companyId], references: [id])
+  id          String   @id @default(uuid())
+  date        String
+  description String[] @default([])
+  staffId     String
+  companyId   String
+  staff       Staff    @relation(fields: [staffId], references: [id])
+  company     Company  @relation(fields: [companyId], references: [id])
 }
 
-
 model ImageUrl {
-  id        String   @id @default(uuid())
-  url       String
-  publicId  String   @unique
- created_at String
-  email     String
-  bytes Int
+  id         String @id @default(uuid())
+  url        String
+  publicId   String @unique
+  created_at String
+  bytes      Int
+  companyId   String
+  company     Company  @relation(fields: [companyId], references: [id])
+
 }
