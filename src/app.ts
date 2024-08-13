@@ -77,7 +77,7 @@ app.use("/notifications", notificationsRoute);
 app.use("/chats", chatRoute);
 
 app.listen(PORT, () => {
-  console.log(process.env.DATABASE_URL, 'database');
+  console.log(process.env.DATABASE_URL, 'Database is online');
 
   console.log("Express server is running on port " + PORT);
 });
