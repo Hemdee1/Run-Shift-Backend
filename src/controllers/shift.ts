@@ -3,56 +3,77 @@ import { RequestHandler } from "express";
 const prisma = new PrismaClient();
 
 const getShifts: RequestHandler = async (req, res) => {
-    const companyId = req.params.companyId 
+  const companyId = req.params.companyId;
 
-    console.log('route hit for get shift', companyId);
-    
+  console.log("route hit for get shift", companyId);
 
-    try {
-        const shifts = await prisma.shift.findMany({
-            where: {
-                companyId: companyId
-            },
-            include: {
-                staff: true
-            }
-        });
-        console.log(shifts);
-        
-        res.status(200).json(shifts);
-    } catch (error: any) {
-        console.log(error);
-        res.status(400).json({ error: "Failed to fetch shifts for the company." });
-    }
-}
+  try {
+    const shifts = await prisma.shift.findMany({
+      where: {
+        companyId: companyId,
+      },
+      include: {
+        staff: true,
+      },
+    });
+    console.log(shifts);
 
-const addShift: RequestHandler = async (req, res) => {
-    const { date, description, staffId, companyId } = req.body;
-
-    try {
-        const newShift = await prisma.shift.create({
-            data: {
-                date: date,
-                description: description,
-                staffId: staffId,
-                companyId: companyId,
-            },
-            include: {
-                staff: true,
-                company: true,
-            },
-        })
-
-        console.log(newShift);
-        
-
-        res.status(200).json(newShift);
-    } catch (error: any) {
-        console.log(error);
-        res.status(400).json({ error: "Failed to add new shift." });
-    }
+    res.status(200).json(shifts);
+  } catch (error: any) {
+    console.log(error);
+    res.status(400).json({ error: "Failed to fetch shifts for the company." });
+  }
 };
 
+const addShift: RequestHandler = async (req, res) => {
+  const { date, description, staffId, companyId } = req.body;
 
+  try {
+    const newShift = await prisma.shift.create({
+      data: {
+        date: date,
+        description: description,
+        staffId: staffId,
+        companyId: companyId,
+      },
+      include: {
+        staff: true,
+        company: true,
+      },
+    });
 
-export { getShifts, addShift }
+    console.log(newShift);
+
+    res.status(200).json(newShift);
+  } catch (error: any) {
+    console.log(error);
+    res.status(400).json({ error: "Failed to add new shift." });
+  }
+};
+
+// New function to get shifts by date
+const getShiftsByDate: RequestHandler = async (req, res) => {
+  const { date } = req.params; // Date in 'YYYY-MM-DD' format
+
+  try {
+    const shifts = await prisma.shift.findMany({
+      where: {
+        date: date, // Directly compare the date string
+      },
+      include: {
+        staff: true,
+      },
+    });
+
+    console.log(shifts);
+
+    res.status(200).json(shifts);
+  } catch (error: any) {
+    console.log(error);
+    res
+      .status(400)
+      .json({ error: "Failed to fetch shifts for the given date." });
+  }
+};
+
+export { getShifts, addShift, getShiftsByDate };
