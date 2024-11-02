@@ -1,10 +1,13 @@
 import { PrismaClient } from "@prisma/client";
 import { RequestHandler, Request, Response } from "express";
 import bcrypt from "bcrypt";
-// import { createToken, verifyToken } from "../utils/jwt";
+import { createToken, verifyToken } from "../utils/jwt";
 import verifyEmailTemplate from "../emails/verifyEmail";
 // import sendMail from "../utils/sendMail";
-import { cloudinaryDeleteImage, cloudinaryUploadImage } from "../utils/uploadImage";
+import {
+  cloudinaryDeleteImage,
+  cloudinaryUploadImage,
+} from "../utils/uploadImage";
 import resetPasswordEmailTemplate from "../emails/resetPasswordEmail";
 
 const url =
@@ -12,11 +15,20 @@ const url =
 const prisma = new PrismaClient();
 
 const SignUp: RequestHandler = async (req, res) => {
-  let { managersFirstName, managersLastName, email, companyName, password } = req.body;
+  let { managersFirstName, managersLastName, email, companyName, password } =
+    req.body;
   email = email?.toLowerCase();
 
   try {
-    if (!(managersFirstName && managersLastName && email && password && companyName)) {
+    if (
+      !(
+        managersFirstName &&
+        managersLastName &&
+        email &&
+        password &&
+        companyName
+      )
+    ) {
       throw Error("All credentials must be included");
     }
 
@@ -58,12 +70,12 @@ const SignUp: RequestHandler = async (req, res) => {
         },
         password: hashedPassword,
         role: "manager",
-      }
-    })
+      },
+    });
 
     // send a link to verify email
-    // const token = createToken(company.id);
-    const token = 'createToken(company.id);'
+    const token = createToken(company.id);
+    // const token = "createToken(company.id);";
     const link = `${url}/verify-email?token=${token}`;
 
     const data = {
@@ -81,11 +93,9 @@ const SignUp: RequestHandler = async (req, res) => {
   }
 };
 
-
-
 const LogIn: RequestHandler = async (req, res) => {
-  console.log('request hit');
-  
+  console.log("request hit", req.body);
+
   let { email, password } = req.body;
   email = email.toLowerCase();
 
@@ -96,9 +106,7 @@ const LogIn: RequestHandler = async (req, res) => {
 
     const staff = await prisma.staff.findUnique({ where: { email } });
 
-
     if (!staff) {
-
       throw Error("Incorrect credentials");
     }
 
@@ -107,6 +115,8 @@ const LogIn: RequestHandler = async (req, res) => {
     if (!correctPassword) {
       throw Error("Incorrect credentials");
     }
+
+    console.log(staff);
 
     // Check role, if manager send verification email again
     // if (!company.verified) {
@@ -139,7 +149,7 @@ const VerifyEmail: RequestHandler = async (req, res) => {
   const token = req.params.token;
 
   try {
-    const id = 'verifyToken(token);'
+    const id = "verifyToken(token);";
 
     if (!id) {
       throw Error(
@@ -198,7 +208,7 @@ const SendPasswordLink: RequestHandler = async (req, res) => {
       throw Error("Company not found!");
     }
 
-    const token = 'createToken(company.id);'
+    const token = "createToken(company.id);";
     const link = `${url}/reset-password?token=${token}`;
 
     const data = {
@@ -234,7 +244,7 @@ const ChangePassword: RequestHandler = async (req, res) => {
       throw Error("Password must be at least 8 characters long");
     }
 
-    const id = ' verifyToken(token)';
+    const id = " verifyToken(token)";
 
     if (!id) {
       throw Error(
@@ -314,13 +324,14 @@ const getAllCompanies: RequestHandler = async (req, res) => {
   }
 };
 
-
-const SaveCloudinaryUrl: RequestHandler = async (req: Request, res: Response) => {
-  console.log('route hit');
+const SaveCloudinaryUrl: RequestHandler = async (
+  req: Request,
+  res: Response
+) => {
+  console.log("route hit");
   let { url, created_at, bytes, companyId, publicId, company } = req.body;
 
   console.log(companyId);
-  
 
   try {
     if (!(url && created_at && bytes && companyId && publicId)) {
@@ -338,11 +349,15 @@ const SaveCloudinaryUrl: RequestHandler = async (req: Request, res: Response) =>
     // create the url and save in the db
     const imageUrl = await prisma.imageUrl.create({
       data: {
-        url, created_at, bytes, publicId,  company: {
-                    connect: {
-                        id: companyId,
-                    },
-                },
+        url,
+        created_at,
+        bytes,
+        publicId,
+        company: {
+          connect: {
+            id: companyId,
+          },
+        },
       },
     });
 
@@ -351,10 +366,10 @@ const SaveCloudinaryUrl: RequestHandler = async (req: Request, res: Response) =>
     console.log(error);
     res.status(400).json(error.message);
   }
-}
+};
 
 const deleteImage: RequestHandler = async (req: Request, res: Response) => {
-  console.log('delete image route hit');
+  console.log("delete image route hit");
   const { publicId } = req.body;
 
   try {
@@ -364,7 +379,9 @@ const deleteImage: RequestHandler = async (req: Request, res: Response) => {
     });
 
     if (!existingImage) {
-      return res.status(404).json({ message: 'Image not found in the database' });
+      return res
+        .status(404)
+        .json({ message: "Image not found in the database" });
     }
 
     // Delete the image from Cloudinary
@@ -375,20 +392,21 @@ const deleteImage: RequestHandler = async (req: Request, res: Response) => {
       where: { publicId },
     });
 
-    res.status(200).json({ message: 'Image deleted successfully', result });
+    res.status(200).json({ message: "Image deleted successfully", result });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Failed to delete image', error });
+    res.status(500).json({ message: "Failed to delete image", error });
   }
-}
+};
 
-
-const getCloudinaryUrl: RequestHandler = async (req: Request, res: Response) => {
-  console.log('Route hit');
+const getCloudinaryUrl: RequestHandler = async (
+  req: Request,
+  res: Response
+) => {
+  console.log("Route hit");
   const { id } = req.params;
 
   console.log(req.params);
-  
 
   try {
     if (!id) {
@@ -401,7 +419,6 @@ const getCloudinaryUrl: RequestHandler = async (req: Request, res: Response) => 
     });
 
     console.log(existingCompany);
-    
 
     if (!existingCompany) {
       return res.status(404).json({ error: "Company doesn't exist" });
@@ -409,17 +426,15 @@ const getCloudinaryUrl: RequestHandler = async (req: Request, res: Response) => 
 
     // Fetch all images associated with the company email
     const images = await prisma.imageUrl.findMany({
-      where: {companyId:id },
+      where: { companyId: id },
     });
 
     res.status(200).json(images);
-  } catch (error:any) {
+  } catch (error: any) {
     console.error(error);
     res.status(500).json({ error: error.message });
   }
 };
-
-
 
 export {
   SignUp,
@@ -434,6 +449,5 @@ export {
   LogOut,
   getAllCompanies,
   getCompany,
-deleteImage,
-
+  deleteImage,
 };

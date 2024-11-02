@@ -1,5 +1,8 @@
+import dotenv from "dotenv";
+dotenv.config();
+
 import { PrismaClient } from "@prisma/client";
-import fileUpload from 'express-fileupload';
+import fileUpload from "express-fileupload";
 import express, { Request, Response } from "express";
 import session from "express-session";
 import connectPg from "connect-pg-simple";
@@ -9,8 +12,6 @@ import shiftRoute from "./routes/shift";
 import staffRoute from "./routes/staff";
 import notificationsRoute from "./routes/notifications";
 import chatRoute from "./routes/chat";
-
-
 
 // Testing commit
 
@@ -43,11 +44,12 @@ const sessionStore = new PostgresqlStore({
 
 app.set("trust proxy", 1);
 
-app.use(fileUpload({
-  useTempFiles: true,
-  tempFileDir: '/tmp/'
-}));
-
+app.use(
+  fileUpload({
+    useTempFiles: true,
+    tempFileDir: "/tmp/",
+  })
+);
 
 app.use(
   session({
@@ -77,7 +79,7 @@ app.use("/notifications", notificationsRoute);
 app.use("/chats", chatRoute);
 
 app.listen(PORT, () => {
-  console.log(process.env.DATABASE_URL, 'Database is online');
+  console.log(process.env.DATABASE_URL, "Database is online");
 
   console.log("Express server is running on port " + PORT);
 });
